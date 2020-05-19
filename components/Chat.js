@@ -49,12 +49,12 @@ export default class Chat extends Component {
         this.state = {
             messages: [],
             uid: 0,
+            startTime: new Date(), //(new Date()).toISOString(),
             loggedInText: 'Please wait, you are getting logged in',
         };
     }
 
     onCollectionUpdate = (querySnapshot) => {
-        //console.log("onCollectionUpdate");
         let messages = [];
         // go through each document
         querySnapshot.forEach((doc) => {
@@ -69,6 +69,7 @@ export default class Chat extends Component {
                 location: data.location
             });
         });
+        messages = messages.filter((i) => {return new Date(i.createdAt) > this.state.startTime});
         messages = messages.sort((a,b) => { return b.createdAt - a.createdAt });
         this.setState({
             messages: messages
@@ -96,8 +97,6 @@ export default class Chat extends Component {
                 await firebase.auth().signInAnonymously();
                 return;
             }
-
-            //console.log('user: ' + JSON.stringify(user));
 
             //update user state with currently active user data
             this.setState({
