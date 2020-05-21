@@ -1,6 +1,6 @@
-import { View, Platform, StyleSheet } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat'
-import KeyboardSpacer from 'react-native-keyboard-spacer'
+import { View, Platform, StyleSheet, AsyncStorage } from 'react-native';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat'
+import NetInfo from '@react-native-community/netinfo'
 import React, { Component } from 'react';
 
 import {decode, encode} from 'base-64';
@@ -48,6 +48,7 @@ export default class Chat extends Component {
         this.referenceChatMessages = firebase.firestore().collection('messages');
         this.state = {
             messages: [],
+            isOnline: false,
             uid: 0,
             startTime: new Date(), //(new Date()).toISOString(),
             loggedInText: 'Please wait, you are getting logged in',
@@ -57,9 +58,12 @@ export default class Chat extends Component {
     onCollectionUpdate = (querySnapshot) => {
         let messages = [];
         // go through each document
+        let count = 0;
         querySnapshot.forEach((doc) => {
+            count++;
             // get the QueryDocumentSnapshot's data
             var data = doc.data();
+            //if (!data._id) console.log("missing id: " + JSON.stringify(data) );
             messages.push({
                 _id: data._id,
                 text: data.text,
@@ -69,10 +73,12 @@ export default class Chat extends Component {
                 location: data.location
             });
         });
-        messages = messages.filter((i) => {return new Date(i.createdAt) > this.state.startTime});
+        //messages = messages.filter((i) => {return new Date(i.createdAt) > this.state.startTime});
         messages = messages.sort((a,b) => { return b.createdAt - a.createdAt });
         this.setState({
             messages: messages
+        },() => {
+            this.saveMessages();
         });
     };
 
@@ -89,45 +95,101 @@ export default class Chat extends Component {
         messages: []
     };
 
+
     // Adding message props
     componentDidMount() {
-        // listen to authentication events
-        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async user => {
-            if (!user) {
-                await firebase.auth().signInAnonymously();
-                return;
+
+        let isOnline;
+
+        NetInfo.fetch().then(state => {
+
+            this.setState({isOnline: state.isConnected});
+            isOnline = state.isConnected;
+
+            if (state.isConnected) {
+                console.log('online');
+            } else {
+                console.log('offline');
             }
 
-            //update user state with currently active user data
-            this.setState({
-                uid: user.uid,
-                loggedInText: 'Hello there',
-            });
+            if (!isOnline) {
+                this.getMessages();
+            } else {
 
-            //this.unsubscribeChatUser = this.referenceChatMessages.onSnapshot(this.onCollectionUpdate);
+                // listen to authentication events
+                this.authUnsubscribe = firebase.auth().onAuthStateChanged(async user => {
+                    if (!user) {
+                        await firebase.auth().signInAnonymously();
+                        return;
+                    }
 
-            // create a reference to the active user's documents (chat messages)
-            this.referenceChatUser = firebase.firestore().collection('messages');
-            // .where("user.uid", "==", user.uid)
-            // listen for collection changes for current user
-            this.unsubscribeChatUser = this.referenceChatUser.onSnapshot(this.onCollectionUpdate);
+                    //update user state with currently active user data
+                    this.setState({
+                        uid: user.uid,
+                        //loggedInText: 'Hello there',
+                    });
+
+
+                    //this.unsubscribeChatUser = this.referenceChatMessages.onSnapshot(this.onCollectionUpdate);
+
+                    // create a reference to the active user's documents (chat messages)
+                    this.referenceChatUser = firebase.firestore().collection('messages');
+                    // .where("user.uid", "==", user.uid)
+                    // listen for collection changes for current user
+                    this.unsubscribeChatUser = this.referenceChatUser.onSnapshot(this.onCollectionUpdate);
+                });
+            }
+
         });
+
+
     }
 
     componentWillUnmount() {
-        // stop listening to authentication
-        this.authUnsubscribe();
-        // stop listening for changes
-        this.unsubscribeChatUser();
+        if (this.state.isOnline) {
+            // stop listening to authentication
+            this.authUnsubscribe();
+            // stop listening for changes
+            this.unsubscribeChatUser();
+        }
     }
 
+    // Read messages in storage
+
+    async getMessages() {
+        let messages = '';
+        try {
+            messages = await AsyncStorage.getItem('messages') || [];
+            this.setState({
+                messages: JSON.parse(messages)
+            });
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
     // Called when user sends a message
+
     onSend(messages = []) {
         messages.forEach((message) => this.addMessage(message));
-        /*this.setState(previousState => ({
-            messages: GiftedChat.append(previousState.messages, messages[0]),
-        }))*/
     }
+
+    async saveMessages() {
+        try {
+            await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
+    async deleteMessages() {
+        try {
+            await AsyncStorage.removeItem('messages');
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
 
     //Changes background color of message bubble
 
@@ -144,6 +206,19 @@ export default class Chat extends Component {
         )
     }
 
+    // Disables new messages when offline
+
+    renderInputToolbar(props) {
+        if (this.state.isOnline == false) {
+        } else {
+            return(
+                <InputToolbar
+                    {...props}
+                />
+            );
+        }
+    }
+
     render() {
         return (
 
@@ -152,6 +227,7 @@ export default class Chat extends Component {
                 <GiftedChat
                     //key={this.state._id}
                     renderBubble={this.renderBubble.bind(this)}
+                    renderInputToolbar={this.renderInputToolbar.bind(this)}
                     messages={this.state.messages}
                     onSend={messages => this.onSend(messages)}
                     user={{

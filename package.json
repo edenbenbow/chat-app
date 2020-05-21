@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@react-native-community/masked-view": "0.1.6",
+    "@react-native-community/netinfo": "^5.9.0",
     "base-64": "^0.1.0",
+    "cookies": "^0.8.0",
     "expo": "^37.0.9",
     "firebase": "7.9.0",
     "react": "~16.9.0",
