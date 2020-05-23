@@ -1,11 +1,13 @@
 import { View, Platform, StyleSheet, AsyncStorage } from 'react-native';
-import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble, InputToolbar,  } from 'react-native-gifted-chat'
 import NetInfo from '@react-native-community/netinfo'
 import React, { Component } from 'react';
-
+import CustomActions from './CustomActions';
 import {decode, encode} from 'base-64';
 if (!global.btoa) {  global.btoa = encode }
 if (!global.atob) { global.atob = decode }
+import MapView from 'react-native-maps';
+
 
 const firebase = require('firebase');
 require('firebase/firestore');
@@ -94,6 +96,48 @@ export default class Chat extends Component {
     state = {
         messages: []
     };
+
+    // upload image to Storage with XMLHttpRequest
+    uploadImage = async(uri) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function(e) {
+                console.log(e);
+                reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+
+        const ref = firebase
+            .storage()
+            .ref()
+            .child('my-image');
+
+        const snapshot = await ref.put(blob);
+
+        blob.close();
+
+        return await snapshot.ref.getDownloadURL();
+    }
+
+    // upload image to Storage with fetch() and blob()
+    uploadImageFetch = async(uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const ref = firebase
+            .storage()
+            .ref()
+            .child("my-image");
+
+        const snapshot = await ref.put(blob);
+
+        return await snapshot.ref.getDownloadURL();
+    }
 
 
     // Adding message props
@@ -190,6 +234,31 @@ export default class Chat extends Component {
         }
     }
 
+    renderCustomActions = (props) => {
+        return <CustomActions {...props} />;
+    };
+
+    renderCustomView (props) {
+        const { currentMessage} = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3}}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            );
+        }
+        return null;
+    }
+
 
     //Changes background color of message bubble
 
@@ -233,6 +302,8 @@ export default class Chat extends Component {
                     user={{
                         _id: this.state.uid,
                     }}
+                    renderActions={this.renderCustomActions}
+                    renderCustomView={this.renderCustomView}
                 />
 
             </View>
