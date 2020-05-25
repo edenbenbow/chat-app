@@ -125,21 +125,6 @@ export default class Chat extends Component {
         return await snapshot.ref.getDownloadURL();
     }
 
-    // upload image to Storage with fetch() and blob()
-    uploadImageFetch = async(uri) => {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const ref = firebase
-            .storage()
-            .ref()
-            .child("my-image");
-
-        const snapshot = await ref.put(blob);
-
-        return await snapshot.ref.getDownloadURL();
-    }
-
-
     // Adding message props
     componentDidMount() {
 

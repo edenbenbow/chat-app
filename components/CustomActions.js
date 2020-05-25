@@ -6,10 +6,26 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 
+const firebase = require('firebase');
+
 export default class CustomActions extends React.Component {
     state = {
         image: null,
     };
+
+    // upload image to Storage with fetch() and blob()
+    uploadImageFetch = async(uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const ref = firebase
+            .storage()
+            .ref()
+            .child("my-image");
+
+        const snapshot = await ref.put(blob);
+
+        return await snapshot.ref.getDownloadURL();
+    }
 
     pickImage = async () => {
         const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -19,12 +35,12 @@ export default class CustomActions extends React.Component {
             }).catch(error => console.log(error));
 
             if (!result.cancelled) {
-                this.setState({
-                    image: result
-                });
+               const imageUrl = await this.uploadImageFetch(result.uri);
+               this.props.onSend({ image: imageUrl });
+                }
             }
-        }
-    };
+        };
+
 
     takePhoto = async () => {
         const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL, Permissions.CAMERA);
@@ -32,10 +48,10 @@ export default class CustomActions extends React.Component {
             let result = await ImagePicker.launchCameraAsync().catch(error => console.log(error));
 
             if (!result.cancelled) {
-                this.setState({
-                    image: result
-                });
+                const imageUrl = await this.uploadImageFetch(result.uri);
+                this.props.onSend({ image: imageUrl });
             }
+
         }
     };
 
@@ -44,9 +60,12 @@ export default class CustomActions extends React.Component {
         if (status === 'granted') {
             let result = await Location.getCurrentPositionAsync({}).catch(error => console.log(error));
 
-            if (result) {
-                this.setState({
-                    location: result
+            if (!result.cancelled) {
+                this.props.onSend({
+                    location: {
+                      latitude: result.coords.latitude,
+                      longitude: result.coords.longitude
+                    }
                 });
             }
         }
@@ -76,7 +95,12 @@ export default class CustomActions extends React.Component {
 
     render() {
         return (
-            <TouchableOpacity style={[styles.container]} onPress={this.onActionPress}>
+            <TouchableOpacity style={[styles.container]}
+                accessible={true}
+                accessibilityLabel="More options"
+                accessibilityHint="Let’s you choose to send an image or your geolocation."
+                accessibilityRole="button"
+                onPress={this.onActionPress}>
                 <View style={[styles.wrapper, this.props.wrapperStyle]}>
                     <Text style={[styles.iconText, this.props.iconTextStyle]}>+</Text>
                 </View>
