@@ -64,7 +64,7 @@ export default class Chat extends Component {
         querySnapshot.forEach((doc) => {
             count++;
             // get the QueryDocumentSnapshot's data
-            var data = doc.data();
+            let data = doc.data();
             //if (!data._id) console.log("missing id: " + JSON.stringify(data) );
             messages.push({
                 _id: data._id,
@@ -99,31 +99,35 @@ export default class Chat extends Component {
 
     // upload image to Storage with XMLHttpRequest
     uploadImage = async(uri) => {
-        const blob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = function() {
-                resolve(xhr.response);
-            };
-            xhr.onerror = function(e) {
-                console.log(e);
-                reject(new TypeError('Network request failed'));
-            };
-            xhr.responseType = 'blob';
-            xhr.open('GET', uri, true);
-            xhr.send(null);
-        });
+        try {
+            const blob = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.onload = () => {
+                    resolve(xhr.response);
+                };
+                xhr.onerror = (e) => {
+                    console.log(e);
+                    reject(new TypeError('Network request failed'));
+                };
+                xhr.responseType = 'blob';
+                xhr.open('GET', uri, true);
+                xhr.send(null);
+            });
 
-        const ref = firebase
-            .storage()
-            .ref()
-            .child('my-image');
+            const ref = firebase
+                .storage()
+                .ref()
+                .child('my-image');
 
-        const snapshot = await ref.put(blob);
+            const snapshot = await ref.put(blob);
 
-        blob.close();
+            blob.close();
 
-        return await snapshot.ref.getDownloadURL();
-    }
+            return await snapshot.ref.getDownloadURL();
+        } catch (error) {
+            console.log(error.message)
+        }
+    };
 
     // Adding message props
     componentDidMount() {
@@ -147,31 +151,32 @@ export default class Chat extends Component {
 
                 // listen to authentication events
                 this.authUnsubscribe = firebase.auth().onAuthStateChanged(async user => {
-                    if (!user) {
-                        await firebase.auth().signInAnonymously();
-                        return;
+                    try {
+                        if (!user) {
+                            await firebase.auth().signInAnonymously();
+                            return;
+                        }
+
+                        //update user state with currently active user data
+                        this.setState({
+                            uid: user.uid,
+                            //loggedInText: 'Hello there',
+                        });
+
+
+                        //this.unsubscribeChatUser = this.referenceChatMessages.onSnapshot(this.onCollectionUpdate);
+
+                        // create a reference to the active user's documents (chat messages)
+                        this.referenceChatUser = firebase.firestore().collection('messages');
+                        // .where("user.uid", "==", user.uid)
+                        // listen for collection changes for current user
+                        this.unsubscribeChatUser = this.referenceChatUser.onSnapshot(this.onCollectionUpdate);
+                    } catch (error) {
+                        console.log(error.message)
                     }
-
-                    //update user state with currently active user data
-                    this.setState({
-                        uid: user.uid,
-                        //loggedInText: 'Hello there',
-                    });
-
-
-                    //this.unsubscribeChatUser = this.referenceChatMessages.onSnapshot(this.onCollectionUpdate);
-
-                    // create a reference to the active user's documents (chat messages)
-                    this.referenceChatUser = firebase.firestore().collection('messages');
-                    // .where("user.uid", "==", user.uid)
-                    // listen for collection changes for current user
-                    this.unsubscribeChatUser = this.referenceChatUser.onSnapshot(this.onCollectionUpdate);
                 });
             }
-
         });
-
-
     }
 
     componentWillUnmount() {

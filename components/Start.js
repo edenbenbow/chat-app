@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, TextInput, Image, Button, ScrollView, ImageBackground, TouchableOpacity } from 'react-native';
 import React, { Component } from 'react';
 import Chat from './Chat';
-import TouchableHighlight from "react-native-web/dist/exports/TouchableHighlight";
 
 
 export default class Start extends Component {
