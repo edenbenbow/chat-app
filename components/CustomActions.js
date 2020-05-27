@@ -94,7 +94,7 @@ export default class CustomActions extends React.Component {
                 options,
                 cancelButtonIndex,
             },
-            async (buttonIndex) => {
+            async (buttonIndex = 3) => {
                 try {
                     switch (buttonIndex) {
                         case 0:
