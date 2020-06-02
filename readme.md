@@ -13,7 +13,7 @@ I. Local setup
 1. Download the [latest version of Chat App](https://github.com/edenbenbow/chat-app)
 2. In the project's root directory, run npm install: ```npm install```
 3. Run npm: ``npm start``
-4. Make sure you have the latest LTS node version installed
+4. Make sure you have the [latest LTS node version](https://github.com/nodejs/Release) installed
 5. Install Expo Command Line Interface: ``npm install expo-cli --global`` 
 6. Start Expo: ```expo start```
 7. Download [Android Studio](https://developer.android.com/studio)
