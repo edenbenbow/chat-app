@@ -4,11 +4,6 @@
 
 How to set up and use Chat App.
 
-List all the necessary steps someone would have to follow to set up your chat app:
-Setting up the development environment (Expo, Android Studio, etc.)
-Database configuration (which one, where to put database credentials, etc.)
-Necessary libraries to install
-
 
 ---
 
