@@ -88,3 +88,7 @@ if (!firebase.apps.length){
 ---
 
 ### Screenshots
+
+<img src="https://github.com/edenbenbow/chat-app/blob/master/assets/chat-screen.png" width="200">   <img src="https://github.com/edenbenbow/chat-app/blob/master/assets/welcome-screen.png" width="200">
+
+
