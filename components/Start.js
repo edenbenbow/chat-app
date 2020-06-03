@@ -2,6 +2,10 @@ import { StyleSheet, Text, View, TextInput, Image, Button, ScrollView, ImageBack
 import React, { Component } from 'react';
 import Chat from './Chat';
 
+/**
+ * @description The first page of the app.
+ */
+
 
 export default class Start extends Component {
     // Allows user to set name for nav, color for BG

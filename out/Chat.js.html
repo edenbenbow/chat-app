@@ -1,4 +1,32 @@
-import { View, Platform, StyleSheet, AsyncStorage } from 'react-native';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Chat.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Chat.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { View, Platform, StyleSheet, AsyncStorage } from 'react-native';
 import { GiftedChat, Bubble, InputToolbar,  } from 'react-native-gifted-chat'
 import NetInfo from '@react-native-community/netinfo'
 import React, { Component } from 'react';
@@ -25,7 +53,7 @@ class ErrorBoundary extends React.Component {
 
     render () {
         return this.state.hasError
-            ? <FallbackComponent />
+            ? &lt;FallbackComponent />
             : this.props.children
     }
 }
@@ -60,8 +88,6 @@ export default class Chat extends Component {
     /**
      * Updates the state from Firestore
      * @function onCollectionUpdate
-     * @param querySnapshot
-     * @param doc
      * @param {string} _id
      * @param {string} text
      * @param {date} createdAt
@@ -100,20 +126,19 @@ export default class Chat extends Component {
     /**
      * Adds message to Firestore database
      * @function addMessage
-     * @param {string} message
+     * @param {string} _id
+     * @param {string} text
+     * @param {date} createdAt
+     * @param {object} user
+     * @param {string} image
+     * @param {location} location
      */
 
     addMessage(message) {
         this.referenceChatMessages.add(message);
     }
 
-    /**
-     * Name for nav
-     * Adds message to Firestore database
-     * @function navigationOptions
-     * @param {string} navigation
-     */
-
+    // Name for nav
     static navigationOptions = ({ navigation }) => {
         return {
             title: `${navigation.state.params.name}`
@@ -124,15 +149,7 @@ export default class Chat extends Component {
         messages: []
     };
 
-    /**
-     * Uploads image to Storage with XMLHttpRequest
-     * @async
-     * @function uploadImage
-     * @param uri
-     * @param resolve
-     * @param reject
-     */
-
+    // upload image to Storage with XMLHttpRequest
     uploadImage = async(uri) => {
         try {
             const blob = await new Promise((resolve, reject) => {
@@ -226,8 +243,12 @@ export default class Chat extends Component {
     /**
      * Read messages in storage
      * @function getMessages
-     * @param {string} messages
-     * @returns {state} messages
+     * @param {string} _id
+     * @param {string} text
+     * @param {date} createdAt
+     * @param {object} user
+     * @param {string} image
+     * @param {location} location
      */
 
     async getMessages() {
@@ -242,13 +263,7 @@ export default class Chat extends Component {
         }
     };
 
-
-    /**
-     * Called when user sends a message
-     * @function onSend
-     * @param {string} messages
-     * @returns {state} messages
-     */
+    // Called when user sends a message
 
     onSend(messages = []) {
         messages.forEach((message) => this.addMessage(message));
@@ -256,10 +271,13 @@ export default class Chat extends Component {
 
     /**
      * Saves messages
-     * @async
      * @function saveMessages
-     * @param {string} messages
-     * @returns {AsyncStorage}
+     * @param {string} _id
+     * @param {string} text
+     * @param {date} createdAt
+     * @param {object} user
+     * @param {string} image
+     * @param {location} location
      */
 
     async saveMessages() {
@@ -272,9 +290,13 @@ export default class Chat extends Component {
 
     /**
      * Deletes messages
-     * @async
      * @function deleteMessages
-     * @returns {AsyncStorage}
+     * @param {string} _id
+     * @param {string} text
+     * @param {date} createdAt
+     * @param {object} user
+     * @param {string} image
+     * @param {location} location
      */
 
     async deleteMessages() {
@@ -285,30 +307,15 @@ export default class Chat extends Component {
         }
     }
 
-    /**
-     * Returns mapView if message contains geo coordinates
-     * @function renderCustomActions
-     * @param {*} props
-     * @returns {CustomActions}
-     */
-
     renderCustomActions = (props) => {
-        return <CustomActions {...props} />;
+        return &lt;CustomActions {...props} />;
     };
-
-    /**
-     * Returns mapView if message contains geo coordinates
-     * @function renderCustomView
-     * @param {*} props
-     * @returns {MapView}
-     */
-
 
     renderCustomView (props) {
         const { currentMessage} = props;
         if (currentMessage.location) {
             return (
-                <MapView
+                &lt;MapView
                     style={{width: 150,
                         height: 100,
                         borderRadius: 13,
@@ -326,16 +333,11 @@ export default class Chat extends Component {
     }
 
 
-    /**
-     * Changes background color of message bubble
-     * @function renderBubble
-     * @param {*} props
-     * @returns {Bubble}
-     */
+    //Changes background color of message bubble
 
     renderBubble(props) {
         return (
-            <Bubble
+            &lt;Bubble
                 {...props}
                 wrapperStyle={{
                     right: {
@@ -346,19 +348,13 @@ export default class Chat extends Component {
         )
     }
 
-
-    /**
-     * Disables new messages when offline
-     * @function deleteMessages
-     * @param {*} props
-     * @returns {InputToolbar}
-     */
+    // Disables new messages when offline
 
     renderInputToolbar(props) {
         if (this.state.isOnline == false) {
         } else {
             return(
-                <InputToolbar
+                &lt;InputToolbar
                     {...props}
                 />
             );
@@ -368,9 +364,9 @@ export default class Chat extends Component {
     render() {
         return (
 
-            <View style={{backgroundColor: this.props.navigation.state.params.color, flex: 1}}>
+            &lt;View style={{backgroundColor: this.props.navigation.state.params.color, flex: 1}}>
 
-                <GiftedChat
+                &lt;GiftedChat
                     //key={this.state._id}
                     renderBubble={this.renderBubble.bind(this)}
                     renderInputToolbar={this.renderInputToolbar.bind(this)}
@@ -383,7 +379,7 @@ export default class Chat extends Component {
                     renderCustomView={this.renderCustomView}
                 />
 
-            </View>
+            &lt;/View>
         )
     }
 }
@@ -402,3 +398,26 @@ const styles = StyleSheet.create({
         fontSize: 30,
     }
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addMessage">addMessage</a></li><li><a href="global.html#deleteMessages">deleteMessages</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#onCollectionUpdate">onCollectionUpdate</a></li><li><a href="global.html#saveMessages">saveMessages</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Sun May 31 2020 11:49:31 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

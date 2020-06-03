@@ -12,7 +12,13 @@ export default class CustomActions extends React.Component {
         image: null,
     };
 
-    // upload image to Storage with fetch() and blob()
+    /**
+     * Uploads image to Storage with fetch() and blob()
+     * @async
+     * @function uploadImageFetch
+     * @param uri
+     */
+
     uploadImageFetch = async(uri) => {
         try {
             const response = await fetch(uri);
@@ -29,6 +35,12 @@ export default class CustomActions extends React.Component {
             console.log(error.message)
         }
     };
+
+    /**
+     * Allows user to choose an image from library
+     * @async
+     * @function pickImage
+     */
 
     pickImage = async () => {
         try {
@@ -48,6 +60,11 @@ export default class CustomActions extends React.Component {
         }
     };
 
+    /**
+     * @async
+     * @function takePhoto
+     */
+
 
     takePhoto = async () => {
         try {
@@ -65,6 +82,11 @@ export default class CustomActions extends React.Component {
             console.log(error.message);
         }
     };
+
+    /**
+     * @async
+     * @function getLocation
+     */
 
     getLocation = async () => {
         try {
@@ -85,6 +107,11 @@ export default class CustomActions extends React.Component {
             console.log(error.message);
         }
     };
+
+    /**
+     * @function onActionPress
+     * @param buttonIndex
+     */
 
     onActionPress = () => {
         const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
